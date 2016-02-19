@@ -513,18 +513,18 @@ function er_page($arg) {
 	}
 	return drupal_not_found();
 }
-
 //menu hook which procs when trying to download certain excel sheets, ex: /reporting/participants/download
 function er_page_download($arg) {
 	if (($library = libraries_detect('PHPExcel')) && !empty($library['installed']) && libraries_load_files($library)) {// The library is installed, and files are loaded.
 		if($page = er_load_page($arg)){
 			$objPHPExcel = $page->excel();
 			$objPHPExcel->setActiveSheetIndex(0); //initialize to the first page...
-			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 			//comment these next few blocks if you want to debug the excel system... (shows error messeges)
 			if (!ER_DEBUG_EXCEL){
-				header('Content-Type: application/vnd.ms-excel');
-				header('Content-Disposition: attachment;filename="'.$page->title().'.xls"');
+				ob_clean(); //this will clean the output buffer
+				header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+				header('Content-Disposition: attachment;filename="'.$page->title().'.xlsx"');
 				header('Cache-Control: max-age=0');
 				$objWriter->save('php://output');
 				module_invoke_all('exit');
